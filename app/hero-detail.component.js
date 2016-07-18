@@ -9,20 +9,35 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var core_1 = require('@angular/core');
-var hero_1 = require('./hero');
+var router_1 = require('@angular/router');
+var hero_service_1 = require('./hero.service');
 var HeroDetailComponent = (function () {
-    function HeroDetailComponent() {
+    function HeroDetailComponent(heroService, route) {
+        this.heroService = heroService;
+        this.route = route;
     }
-    __decorate([
-        core_1.Input(), 
-        __metadata('design:type', hero_1.Hero)
-    ], HeroDetailComponent.prototype, "hero", void 0);
+    HeroDetailComponent.prototype.ngOnInit = function () {
+        var _this = this;
+        this.sub = this.route.params.subscribe(function (params) {
+            _this.loadHero(+params['id']);
+        });
+    };
+    HeroDetailComponent.prototype.ngOnDestroy = function () {
+        this.sub.unsubscribe();
+    };
+    HeroDetailComponent.prototype.goBack = function () {
+        window.history.back();
+    };
+    HeroDetailComponent.prototype.loadHero = function (id) {
+        var _this = this;
+        this.heroService.getHero(id).then(function (hero) { return _this.hero = hero; });
+    };
     HeroDetailComponent = __decorate([
         core_1.Component({
             selector: 'my-hero-detail',
-            template: "\n\t\t<div *ngIf=\"hero\">\n\t\t\t<h2>{{hero.name}} details!</h2>\n\t\t\t<div>\n\t\t\t\t<label>id: </label>\n\t\t\t\t{{hero.id}}\n\t\t\t</div>\n\t\t\t<div>\n\t\t\t\t<label>name: </label>\n\t\t\t\t<input [(ngModel)]=\"hero.name\" placeholder=\"name\">\n\t\t\t</div>\n\t\t</div>\n\t"
+            templateUrl: 'app/hero-detail.component.html'
         }), 
-        __metadata('design:paramtypes', [])
+        __metadata('design:paramtypes', [hero_service_1.HeroService, router_1.ActivatedRoute])
     ], HeroDetailComponent);
     return HeroDetailComponent;
 }());
