@@ -10,28 +10,60 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var core_1 = require('@angular/core');
 var router_1 = require('@angular/router');
+var hero_1 = require('./hero');
 var hero_service_1 = require('./hero.service');
 var HeroDetailComponent = (function () {
     function HeroDetailComponent(heroService, route) {
         this.heroService = heroService;
         this.route = route;
+        this.close = new core_1.EventEmitter();
+        this.navigated = false;
     }
     HeroDetailComponent.prototype.ngOnInit = function () {
         var _this = this;
         this.sub = this.route.params.subscribe(function (params) {
-            _this.loadHero(+params['id']);
+            if (params['id'] !== undefined) {
+                var id = +params['id'];
+                _this.navigated = true;
+                _this.heroService.getHero(id)
+                    .then(function (hero) { return _this.hero = hero; });
+            }
+            else {
+                _this.navigated = false;
+                _this.hero = new hero_1.Hero();
+            }
         });
     };
     HeroDetailComponent.prototype.ngOnDestroy = function () {
         this.sub.unsubscribe();
     };
-    HeroDetailComponent.prototype.goBack = function () {
-        window.history.back();
+    HeroDetailComponent.prototype.save = function () {
+        var _this = this;
+        this.heroService.save(this.hero)
+            .then(function (hero) {
+            _this.hero = hero;
+            _this.goBack(hero);
+        });
+    };
+    HeroDetailComponent.prototype.goBack = function (savedHero) {
+        if (savedHero === void 0) { savedHero = null; }
+        this.close.emit(savedHero);
+        if (this.navigated) {
+            window.history.back();
+        }
     };
     HeroDetailComponent.prototype.loadHero = function (id) {
         var _this = this;
         this.heroService.getHero(id).then(function (hero) { return _this.hero = hero; });
     };
+    __decorate([
+        core_1.Input(), 
+        __metadata('design:type', hero_1.Hero)
+    ], HeroDetailComponent.prototype, "hero", void 0);
+    __decorate([
+        core_1.Output(), 
+        __metadata('design:type', Object)
+    ], HeroDetailComponent.prototype, "close", void 0);
     HeroDetailComponent = __decorate([
         core_1.Component({
             selector: 'my-hero-detail',
